@@ -5,10 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReqSignupDto {
-    private String username;
+public class ReqForgetPassword {
     private String email;
     private String password;
-    private String address;
-    private String phoneNumber;
 }

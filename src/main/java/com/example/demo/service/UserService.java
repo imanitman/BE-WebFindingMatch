@@ -33,6 +33,7 @@ public class UserService {
         new_user.setPassword(reqSignupDto.getPassword());
         new_user.setName(reqSignupDto.getUsername());
         new_user.setAddress(reqSignupDto.getAddress());
+        new_user.setPhone_number(reqSignupDto.getPhoneNumber());
         return new_user;
     }
     public ResSignupDto convertUserToResSignupDto(User user){
@@ -44,5 +45,10 @@ public class UserService {
     }
     public List<User> fetchAllUsers(){
         return this.userRepository.findAll();
+    }
+
+    public void updateRefreshToken(String new_refresh_token, String email){
+        User current_user = this.fetchUserByEmail(email);
+        current_user.setRefresh_token(new_refresh_token);
     }
 }

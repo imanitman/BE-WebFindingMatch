@@ -1,10 +1,12 @@
 package com.example.demo.controller.Auth;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.Duration;
 import java.util.Collections;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -15,14 +17,19 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.domain.User;
+import com.example.demo.domain.request.OtpRequest;
+import com.example.demo.domain.request.ReqForgetPassword;
 import com.example.demo.domain.request.ReqLoginDto;
 import com.example.demo.domain.request.ReqSignupDto;
 import com.example.demo.domain.response.ResLoginDto;
 import com.example.demo.domain.response.ResSignupDto;
+import com.example.demo.service.EmailService;
+import com.example.demo.service.SmsService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.SecurityUtil;
 import com.example.demo.util.error.InvalidException;
@@ -42,11 +49,20 @@ public class AuthController {
     private final SecurityUtil securityUtil;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final PasswordEncoder passwordEncoder;
-    public AuthController(UserService userService, PasswordEncoder passwordEncoder, SecurityUtil securityUtil, AuthenticationManagerBuilder authenticationManagerBuilder){
+    private final EmailService emailService;
+    private final SmsService smsService;
+    private final RedisTemplate<String, String> redisTemplate;
+    public AuthController(
+        UserService userService, PasswordEncoder passwordEncoder, SecurityUtil securityUtil,
+        AuthenticationManagerBuilder authenticationManagerBuilder, EmailService emailService, SmsService smsService,
+        RedisTemplate<String, String> redisTemplate){
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.securityUtil = securityUtil;
         this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.emailService = emailService;
+        this.smsService = smsService;
+        this.redisTemplate = redisTemplate;
     }
     @Value("${nam.jwt.base64-secret}")
     private String jwtKey;
@@ -91,6 +107,11 @@ public class AuthController {
         String access_token = this.securityUtil.createAccessToken(currentUserDB.getEmail(), resLoginDto);
         resLoginDto.setAccessToken(access_token);
 
+        String refresh_token = this.securityUtil.createRefreshToken(currentUserDB.getEmail(), resLoginDto);
+
+        //lưu refresh_token vào database của User
+        this.userService.updateRefreshToken(refresh_token, currentUserDB.getEmail());
+        //
         ResponseCookie responseCookie =  ResponseCookie
             .from("access_token", access_token)
             .httpOnly(true)
@@ -120,16 +141,20 @@ public class AuthController {
         }
         resLoginDto.setUser(userLogin);
         String access_token = this.securityUtil.createAccessToken(userLogin.getEmail(), resLoginDto);
-
-        resLoginDto.setAccessToken(access_token);
-
+        String refresh_token = this.securityUtil.createRefreshToken(userLogin.getEmail(), resLoginDto);
         if (!this.userService.isEmailExistsInDB(userLogin.getEmail())){
             User new_user = new User();
                 new_user.setEmail(userLogin.getEmail());
                 new_user.setName(userLogin.getName());
-                new_user.setPassword("google");
+                new_user.setRefresh_token(refresh_token);
             this.userService.createNewUser(new_user);
         }
+
+        this.userService.updateRefreshToken(refresh_token, userLogin.getEmail());
+
+
+        resLoginDto.setAccessToken(access_token);
+
         ResponseCookie responseCookie =  ResponseCookie
             .from("access_token", access_token)
             .httpOnly(true)
@@ -140,5 +165,48 @@ public class AuthController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(resLoginDto);
+    }
+
+    @PostMapping("/forget")
+    public ResponseEntity<String> forgetPassword(@RequestBody Map<String, String> user_email) throws InvalidException {
+        String email = user_email.get("email");
+        User current_user = this.userService.fetchUserByEmail(email);
+        if (current_user == null){
+            throw new InvalidException("Email is invalid");
+        }
+        String otp = this.smsService.generateOtp();
+        this.redisTemplate.opsForValue().set(email, otp, Duration.ofMinutes(3));
+        this.emailService.sendVerificationEmail(email, "otp:",otp);
+
+        return ResponseEntity.ok().body("send email successfully");
+    }
+
+    @PostMapping("/forget/check")
+    public ResponseEntity<String> postMethodName(@RequestBody OtpRequest otpRequest) throws InvalidException {
+        String current_email = otpRequest.getEmail();
+        if (current_email != null){
+            String sys_otp = this.redisTemplate.opsForValue().get(current_email);
+            if (otpRequest.getOtp() == sys_otp){
+                return ResponseEntity.ok().body("Successfull");
+            }
+            else{
+                return ResponseEntity.ok().body("Try again");
+            }
+        }
+        else{
+            throw new InvalidException("Email is invalid");
+        }
+    }
+    @PutMapping("/forget/check/password")
+    public ResponseEntity<String> updateForgetPassword(@RequestBody ReqForgetPassword  request) throws InvalidException {
+        User updateUser = this.userService.fetchUserByEmail(request.getEmail());
+        if (updateUser != null){
+            updateUser.setPassword(this.passwordEncoder.encode(updateUser.getPassword()));
+            this.userService.createNewUser(updateUser);
+            return ResponseEntity.ok().body("Password was update successfully");
+        }
+        else{
+            throw new InvalidException("Email is invalid");
+        }
     }
 }

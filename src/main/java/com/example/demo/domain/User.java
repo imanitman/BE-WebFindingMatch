@@ -20,4 +20,6 @@ public class User {
     private String password;
     private String name;
     private String address;
+    private String refresh_token;
+    private String phone_number;
 }
