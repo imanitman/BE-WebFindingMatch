@@ -88,7 +88,7 @@ public class AuthController {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDto.getUsername(), loginDto.getPassword());
 
-        // xác thực người dùng => cần viết hàm loadUserByUsername
+        // xác thực người dùng => khi gọi authenticate thì nó sẽ tìm đến loadUserByUsername
         Authentication authentication = authenticationManagerBuilder.getObject()
                 .authenticate(authenticationToken);
 
@@ -178,7 +178,7 @@ public class AuthController {
         this.redisTemplate.opsForValue().set(email, otp, Duration.ofMinutes(3));
         this.emailService.sendVerificationEmail(email, "otp:",otp);
 
-        return ResponseEntity.ok().body("send email successfully");
+        return ResponseEntity.ok().body("Send message successful");
     }
 
     @PostMapping("/forget/check")
