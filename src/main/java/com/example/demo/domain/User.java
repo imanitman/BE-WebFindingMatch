@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -15,8 +16,8 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-// @Entity
-// @Table(name= "users")
+@Entity
+@Table(name= "users")
 @Getter
 @Setter
 public class User {
@@ -27,7 +28,8 @@ public class User {
     private String password;
     private String name;
     private String address;
-    private String refresh_token;
+    @Column(columnDefinition = "MEDIUMTEXT")
+    private String refreshToken;
     private String phone_number;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)

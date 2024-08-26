@@ -2,8 +2,12 @@ package com.example.demo.service;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.example.demo.domain.Match;
 import com.example.demo.domain.User;
 import com.example.demo.domain.request.ReqSignupDto;
 import com.example.demo.domain.response.ResSignupDto;
@@ -49,6 +53,11 @@ public class UserService {
 
     public void updateRefreshToken(String new_refresh_token, String email){
         User current_user = this.fetchUserByEmail(email);
-        current_user.setRefresh_token(new_refresh_token);
+        current_user.setRefreshToken(null);
+        User new_user = this.createNewUser(current_user);
     }
+    public User fecthUserByEmailAndRefreshToken(String email, String refresh_token){
+        return this.userRepository.findByEmailAndRefreshToken(email, refresh_token);
+    }
+    
 }

@@ -1,6 +1,9 @@
 package com.example.demo.domain.request;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,6 +13,9 @@ import lombok.Setter;
 public class MatchRequestDto {
     private String name;
     private String address;
-    private LocalDateTime match_time;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate matchDate;
+    @JsonFormat(pattern = "HH:mm:ss")
+    private LocalTime matchTime;
     private String type;
 }

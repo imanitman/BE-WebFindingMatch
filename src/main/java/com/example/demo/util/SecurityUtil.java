@@ -6,6 +6,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -17,9 +20,11 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtClaimsSet;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.domain.response.ResLoginDto;
+import com.nimbusds.jose.util.Base64;
 
 @Service
 public class SecurityUtil {
@@ -94,6 +99,24 @@ public class SecurityUtil {
         }
         return null;
     }
+    private SecretKey getSecretKey() {
+        byte[] keyBytes = Base64.from(jwtKey).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length,
+                JWT_ALGORITHM.getName());
+    }
+
+
+    public Jwt checkValidRefreshToken(String token){
+     NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(
+                getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build();
+                try {
+                     return jwtDecoder.decode(token);
+                } catch (Exception e) {
+                    System.out.println(">>> Refresh Token error: " + e.getMessage());
+                    throw e;
+                }
+    }
+
 
 
 }

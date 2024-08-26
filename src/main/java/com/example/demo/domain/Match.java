@@ -1,9 +1,12 @@
 package com.example.demo.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import com.example.demo.util.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -26,9 +29,14 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String address;
-    private String team;
-    private LocalDateTime time;
+    private String team1;
+    private String team2;
+     @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate matchDate;
+    @JsonFormat(pattern = "HH:mm:ss")
+    private LocalTime matchTime;
     private String type;
+    private boolean Status;
     private Instant createdAt;
     private String createdBy;
     private Instant updatedAt;
