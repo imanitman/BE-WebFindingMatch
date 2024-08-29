@@ -30,10 +30,10 @@ public class MatchService {
     public Match convertDtoToMatch(MatchRequestDto matchRequestDto){
         Match match = new Match();
         match.setAddress(matchRequestDto.getAddress());
-        match.setTeam1(matchRequestDto.getName());
         match.setMatchDate(matchRequestDto.getMatchDate());
         match.setMatchTime(matchRequestDto.getMatchTime());
         match.setType(matchRequestDto.getType());
+        match.setTeam1(matchRequestDto.getTeam());
         return match;
     }
     public Match fetchMatchById(long id){

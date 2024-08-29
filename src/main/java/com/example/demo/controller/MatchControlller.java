@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.domain.Match;
 import com.example.demo.domain.User;
@@ -61,10 +62,12 @@ public class MatchControlller {
                 return ResponseEntity.ok().body(this.matchService.fetchAllMatchs(page, size));
             }
     @PostMapping("/matchs/join/{id}")
-    public ResponseEntity<Void> postMethodName(@PathVariable ("id") long id, @RequestBody Map<String, String> team2) {
+    public ResponseEntity<Void> postMethodName(@PathVariable ("id") long id) {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "" ;
+        User user = this.userService.fetchUserByEmail(email);
         Match current_match = this.matchService.fetchMatchById(id);
         current_match.setStatus(true);
-        current_match.setTeam2(team2.get("team2"));
+        current_match.setTeam2(user.getTeam());
         this.matchService.createNewMatch(current_match);
         return ResponseEntity.ok().body(null);
     }
@@ -80,5 +83,5 @@ public class MatchControlller {
         List<Match> yourMatchs = this.matchService.fetchAllYourMatch(current_user);
         return ResponseEntity.ok().body(yourMatchs);
     }
-    
+
     }

@@ -2,6 +2,8 @@ package com.example.demo.domain;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;
@@ -17,26 +19,30 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
-@Entity
-@Table(name= "users")
 @Getter
 @Setter
-public class User {
+@Entity
+@Table(name = "teams")
+public class Team {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-    private String email;
-    private String password;
+    
     private String name;
-    private String address;
+    
     @Column(columnDefinition = "MEDIUMTEXT")
-    private String refreshToken;
-    private String phone_number;
+    private String description;
+    private String logo;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "team", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<Match> match;
-    @ManyToOne
-    @JoinColumn(name ="team_id")
-    private Team team;
+    List<User> user;
+
+    @OneToMany(mappedBy = "team1", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Match> matchesAsTeam1;
+
+    @OneToMany(mappedBy = "team2", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Match> matchesAsTeam2;
 }
