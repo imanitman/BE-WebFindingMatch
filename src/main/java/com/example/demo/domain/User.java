@@ -28,11 +28,11 @@ public class User {
     private String email;
     private String password;
     private String name;
+    //Create new table address
     private String address;
     @Column(columnDefinition = "MEDIUMTEXT")
     private String refreshToken;
     private String phone_number;
-
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Match> match;

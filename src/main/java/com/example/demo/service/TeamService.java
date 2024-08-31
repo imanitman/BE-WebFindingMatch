@@ -25,4 +25,10 @@ public class TeamService {
         current_team.setName(reqCreateTeam.getName());
         return current_team;
     }
+    public Team fetchTeamById(long id){
+        return this.teamRepository.findById(id);
+    }
+    public void deleteTeam(long id){
+        this.teamRepository.deleteById(id);
+    }
 }

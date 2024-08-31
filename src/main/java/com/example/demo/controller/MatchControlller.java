@@ -43,7 +43,6 @@ public class MatchControlller {
         match = this.matchService.convertDtoToMatch(entity);
         match.setStatus(false);
         return  ResponseEntity.ok().body(this.matchService.createNewMatch(match));
-
     }
     @GetMapping("/matchs/{id}")
     public ResponseEntity<Match> fetchDetailMatch (@PathVariable ("id") long id) {
@@ -83,5 +82,4 @@ public class MatchControlller {
         List<Match> yourMatchs = this.matchService.fetchAllYourMatch(current_user);
         return ResponseEntity.ok().body(yourMatchs);
     }
-
-    }
+}
