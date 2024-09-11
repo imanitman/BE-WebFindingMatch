@@ -12,7 +12,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class MatchRequestDto {
-    private Team team;
+    private Team  team;
     private String address;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate matchDate;

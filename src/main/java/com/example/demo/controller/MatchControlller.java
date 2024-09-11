@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.domain.Match;
+import com.example.demo.domain.Team;
 import com.example.demo.domain.User;
 import com.example.demo.domain.request.MatchRequestDto;
 import com.example.demo.domain.response.ResAllMatches;
@@ -61,14 +62,21 @@ public class MatchControlller {
                 return ResponseEntity.ok().body(this.matchService.fetchAllMatchs(page, size));
             }
     @PostMapping("/matchs/join/{id}")
-    public ResponseEntity<Void> postMethodName(@PathVariable ("id") long id) {
+    public ResponseEntity<String> postMethodName(@PathVariable ("id") long id) {
         String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "" ;
         User user = this.userService.fetchUserByEmail(email);
         Match current_match = this.matchService.fetchMatchById(id);
-        current_match.setStatus(true);
-        current_match.setTeam2(user.getTeam());
-        this.matchService.createNewMatch(current_match);
-        return ResponseEntity.ok().body(null);
+        String type = current_match.getType();
+        List<Team> teams = user.getTeam();
+        for (Team team : teams){
+            if (team.getCategory() ==  type){
+                current_match.setStatus(true);
+                current_match.setTeam2(team);
+                this.matchService.createNewMatch(current_match);
+                return ResponseEntity.ok().body("Join successfully");
+            }
+        }
+        return ResponseEntity.ok().body("You have to create a team suitable with this match");
     }
     @GetMapping("/matchs/sport/{type}")
     public ResponseEntity<ResSameTypeMatch> sameTypePage(@PathVariable ("type") String type, @RequestParam(value = "page", defaultValue = "0") int page,

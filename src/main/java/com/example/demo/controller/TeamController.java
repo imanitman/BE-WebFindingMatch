@@ -4,10 +4,13 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.demo.domain.Team;
+import com.example.demo.domain.User;
 import com.example.demo.domain.request.ReqCreateTeam;
 import com.example.demo.domain.response.ResGetTeam;
 import com.example.demo.domain.response.ResTeamDto;
 import com.example.demo.service.TeamService;
+import com.example.demo.service.UserService;
+import com.example.demo.util.SecurityUtil;
 import com.example.demo.util.error.InvalidException;
 
 import java.nio.file.Files;
@@ -20,9 +23,9 @@ import java.io.IOException;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
@@ -31,17 +34,20 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-
+import java.util.List;
+import java.util.ArrayList;
 
 
 
 @RestController
 public class TeamController {
     private final TeamService teamService;
+    private final UserService userService;
     public String urlImage = "D://SideProject/FindingMatch/Backend/Image/";
 
-    public TeamController (TeamService teamService){
+    public TeamController (TeamService teamService, UserService userService){
         this.teamService = teamService;
+        this.userService = userService;
     }
     /**
      * @param reqCreateTeam
@@ -50,11 +56,18 @@ public class TeamController {
     @PostMapping("/teams")
     public String createNewTeam(@RequestParam ("name") String name,
         @RequestParam ("description") String desc,
-        @RequestParam ("logo") MultipartFile file) {
+        @RequestPart ("logo") MultipartFile file,
+        @RequestParam ("category") String category) {
         Team currenTeam = new Team();
         if(name != null){
             currenTeam.setName(name);
             currenTeam.setDescription(desc);
+            currenTeam.setCategory(category);
+            String email = SecurityUtil.getCurrentUserLogin().isPresent() == true ? SecurityUtil.getCurrentUserLogin().get() :"null";
+            User currentUser = this.userService.fetchUserByEmail(email);
+            List<User> users = new ArrayList<User>();
+            users.add(currentUser);
+            currenTeam.setUser(users);
         }
         if (file != null && !file.isEmpty()){
             try {
@@ -65,7 +78,9 @@ public class TeamController {
                 this.teamService.createTeam(currenTeam);
                 return "done";
             } catch (Exception e) {
-                return "error";
+                e.printStackTrace();
+                // Hoặc trả về thông tin lỗi cho client
+                return "Error: " + e.getMessage();
             }
         }
         return "fail to connect";
@@ -124,5 +139,35 @@ public class TeamController {
         else{
             return ResponseEntity.badRequest().body(null);
         }
+    }
+    @GetMapping("/teams/create/{category}")
+    public ResponseEntity<Team> getMethodName(@PathVariable ("category") String category) {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : null;
+        User current_user = this.userService.fetchUserByEmail(email);
+        List<Team> teams = current_user.getTeam();
+        for (Team team : teams){
+            if (team.getCategory().equalsIgnoreCase(category)){
+                return ResponseEntity.ok().body(team);
+            }
+        }
+        System.out.println("Can't find");
+        return ResponseEntity.ok().body(null);
+    }
+    @PostMapping("/team/join/{id}")
+    public ResponseEntity<String> JoinTeamPage(@PathVariable ("id") long id) {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() :"null";
+        Team currentTeam = this.teamService.fetchTeamById(id);
+        String category =currentTeam.getCategory();
+        User currentUser = this.userService.fetchUserByEmail(email);
+        List<Team> teams = currentUser.getTeam();
+        for (Team team : teams){
+            if (team.getCategory().equals(category)){
+                teams.remove(team);
+            }
+        }
+        List<User> listMember = currentTeam.getUser();
+        listMember.add(currentUser);
+        currentTeam.setUser(listMember);
+        return ResponseEntity.ok().body("add teamate successfull");
     }
 }
