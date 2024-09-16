@@ -34,10 +34,11 @@ public class Match {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     private String address;
+    private String stadiumName;
      @JsonFormat(pattern = "yyyy-MM-dd")
-    private LocalDate matchDate;
+    private String matchDate;
     @JsonFormat(pattern = "HH:mm:ss")
-    private LocalTime matchTime;
+    private String matchTime;
     private String type;
     private boolean status;
     private Instant createdAt;

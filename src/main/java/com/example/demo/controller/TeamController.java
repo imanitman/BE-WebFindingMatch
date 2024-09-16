@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -54,7 +55,7 @@ public class TeamController {
      * @return
      */
     @PostMapping("/teams")
-    public String createNewTeam(@RequestParam ("name") String name,
+    public ResponseEntity<String> createNewTeam(@RequestParam ("name") String name,
         @RequestParam ("description") String desc,
         @RequestPart ("logo") MultipartFile file,
         @RequestParam ("category") String category) {
@@ -72,18 +73,22 @@ public class TeamController {
         if (file != null && !file.isEmpty()){
             try {
                 String fileName = file.getOriginalFilename();
+                if(fileName != null && !fileName.matches(".*\\.(png|jepg|jpg)$")){
+                    return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                    .body("Chỉ chấp nhận file định dạng PNG, JPEG, JPG");
+                }
                 Path path  = Paths.get(urlImage+fileName);
                 currenTeam.setLogo(path.toString());
                 Files.copy(file.getInputStream(), path);
                 this.teamService.createTeam(currenTeam);
-                return "done";
+                return ResponseEntity.ok().body("done");
             } catch (Exception e) {
                 e.printStackTrace();
                 // Hoặc trả về thông tin lỗi cho client
-                return "Error: " + e.getMessage();
+                return ResponseEntity.badRequest().body(e.getMessage());
             }
         }
-        return "fail to connect";
+        return ResponseEntity.badRequest().body("file is invalid");
     }
     @GetMapping("/teams/{id}")
     public ResponseEntity<ResGetTeam> getDetailTeam(@PathVariable ("id") long id) throws InvalidException, IOException {

@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResSameTypeMatch {
-    List<Match> matches;
+    List<ResMatchDto> matches;
     String type;
     private int totalPage;
     private long totalElement;

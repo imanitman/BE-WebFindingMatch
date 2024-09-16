@@ -1,14 +1,16 @@
 package com.example.demo.service;
 
+
 import org.springframework.stereotype.Service;
+
 
 import com.example.demo.domain.Team;
 import com.example.demo.domain.request.ReqCreateTeam;
+import com.example.demo.domain.response.ResInTeam;
 import com.example.demo.repository.TeamRepository;
 
 @Service
 public class TeamService {
-    
     private final TeamRepository teamRepository;
 
     public TeamService (TeamRepository teamRepository){
@@ -18,7 +20,6 @@ public class TeamService {
     public Team createTeam(Team team){
         return this.teamRepository.save(team);
     }
-
     public Team convertReqCreateToTeam(ReqCreateTeam reqCreateTeam){
         Team current_team = new Team();
         current_team.setDescription(reqCreateTeam.getDescription());
@@ -30,5 +31,13 @@ public class TeamService {
     }
     public void deleteTeam(long id){
         this.teamRepository.deleteById(id);
+    }
+    public ResInTeam convertToResInTeam(Team team){
+        ResInTeam resInTeam = new ResInTeam();
+        resInTeam.setId(team.getId());
+        resInTeam.setLogo(team.getLogo());
+        resInTeam.setName(team.getName());
+        resInTeam.setDescription(team.getDescription());
+        return resInTeam; 
     }
 }

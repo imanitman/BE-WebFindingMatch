@@ -13,7 +13,9 @@ import com.example.demo.domain.response.ResSameTypeMatch;
 import com.example.demo.service.MatchService;
 import com.example.demo.service.UserService;
 import com.example.demo.util.SecurityUtil;
+import com.example.demo.util.error.InvalidException;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +42,7 @@ public class MatchControlller {
     }
     @PostMapping("/matchs")
     public ResponseEntity<Match> createNewMatch(@RequestBody MatchRequestDto entity){
+        System.out.println(entity.getTeam());
         Match match = new Match();
         match = this.matchService.convertDtoToMatch(entity);
         match.setStatus(false);
@@ -58,7 +61,7 @@ public class MatchControlller {
 
     @GetMapping("/matchs")
     public ResponseEntity<ResAllMatches> fetchAllMatches( @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size){
+            @RequestParam(value = "size", defaultValue = "10") int size) throws InvalidException, IOException{
                 return ResponseEntity.ok().body(this.matchService.fetchAllMatchs(page, size));
             }
     @PostMapping("/matchs/join/{id}")
@@ -81,7 +84,8 @@ public class MatchControlller {
     @GetMapping("/matchs/sport/{type}")
     public ResponseEntity<ResSameTypeMatch> sameTypePage(@PathVariable ("type") String type, @RequestParam(value = "page", defaultValue = "0") int page,
     @RequestParam(value = "size", defaultValue = "10") int size) {
-        return ResponseEntity.ok().body(this.matchService.fetchSameTypeMatch(type, page, size));
+        ResSameTypeMatch resSameTypeMatch = this.matchService.fetchSameTypeMatch(type, page, size);
+        return ResponseEntity.ok().body(resSameTypeMatch);
     }
     @GetMapping("/matchs/my")
     public ResponseEntity<List<Match>> myMatchPage() {

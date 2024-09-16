@@ -52,4 +52,6 @@ public class Team {
     @OneToMany(mappedBy = "team2", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Match> matchesAsTeam2;
+
+    public boolean isPresent;
 }
