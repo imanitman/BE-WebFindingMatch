@@ -37,6 +37,7 @@ dependencies {
 	implementation ("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.springframework.boot:spring-boot-starter-cache:3.3.2")
 	implementation("org.springframework.boot:spring-boot-starter-aop:3.3.2")
+	implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 	compileOnly("org.projectlombok:lombok")
 	implementation("org.springframework.boot:spring-boot-starter-mail")
 	implementation("com.google.api-client:google-api-client-jackson2:1.20.0")

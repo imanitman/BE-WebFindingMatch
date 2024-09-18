@@ -3,18 +3,22 @@ package com.example.demo.service;
 
 import org.springframework.stereotype.Service;
 
-
+import java.util.List;
+import java.util.stream.Collectors;
 import com.example.demo.domain.Team;
 import com.example.demo.domain.request.ReqCreateTeam;
 import com.example.demo.domain.response.ResInTeam;
+import com.example.demo.domain.response.ResUserDto;
 import com.example.demo.repository.TeamRepository;
 
 @Service
 public class TeamService {
     private final TeamRepository teamRepository;
+    private final UserService userService;
 
-    public TeamService (TeamRepository teamRepository){
+    public TeamService (TeamRepository teamRepository, UserService userService){
         this.teamRepository = teamRepository;
+        this.userService = userService;
     }
 
     public Team createTeam(Team team){
@@ -38,6 +42,10 @@ public class TeamService {
         resInTeam.setLogo(team.getLogo());
         resInTeam.setName(team.getName());
         resInTeam.setDescription(team.getDescription());
-        return resInTeam; 
+        List<ResUserDto> allPlayer = team.getUser().stream()
+            .map(this.userService::convertToResUserDto)
+            .collect(Collectors.toList());
+        resInTeam.setUser(allPlayer);
+        return resInTeam;
     }
 }

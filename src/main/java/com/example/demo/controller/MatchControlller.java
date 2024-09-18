@@ -9,6 +9,7 @@ import com.example.demo.domain.User;
 import com.example.demo.domain.request.MatchRequestDto;
 import com.example.demo.domain.response.ResAllMatches;
 import com.example.demo.domain.response.ResJoinMatch;
+import com.example.demo.domain.response.ResMatchDto;
 import com.example.demo.domain.response.ResSameTypeMatch;
 import com.example.demo.service.MatchService;
 import com.example.demo.service.UserService;
@@ -49,8 +50,9 @@ public class MatchControlller {
         return  ResponseEntity.ok().body(this.matchService.createNewMatch(match));
     }
     @GetMapping("/matchs/{id}")
-    public ResponseEntity<Match> fetchDetailMatch (@PathVariable ("id") long id) {
-        return ResponseEntity.ok().body(this.matchService.fetchMatchById(id));
+    public ResponseEntity<ResMatchDto> fetchDetailMatch (@PathVariable ("id") long id) {
+        Match currentMatch = this.matchService.fetchMatchById(id);
+        return ResponseEntity.ok().body(this.matchService.convertToResMatch(currentMatch));
     }
 
     @DeleteMapping("/matchs/{id}")

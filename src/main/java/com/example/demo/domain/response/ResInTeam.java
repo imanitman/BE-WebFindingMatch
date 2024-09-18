@@ -3,7 +3,7 @@ package com.example.demo.domain.response;
 import jakarta.persistence.Column;
 import lombok.Getter;
 import lombok.Setter;
-
+import java.util.List;
 @Getter
 @Setter
 public class ResInTeam {
@@ -12,4 +12,5 @@ public class ResInTeam {
     private String description;
     private String logo;
     private String category;
+    private List<ResUserDto> user;
 }

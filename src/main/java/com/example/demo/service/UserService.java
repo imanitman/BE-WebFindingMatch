@@ -11,6 +11,7 @@ import com.example.demo.domain.Match;
 import com.example.demo.domain.User;
 import com.example.demo.domain.request.ReqSignupDto;
 import com.example.demo.domain.response.ResSignupDto;
+import com.example.demo.domain.response.ResUserDto;
 import com.example.demo.repository.UserRepository;
 
 @Service
@@ -60,4 +61,13 @@ public class UserService {
         return this.userRepository.findByEmailAndRefreshToken(email, refresh_token);
     }
     
+    public ResUserDto convertToResUserDto (User user){
+        ResUserDto resUserDto = new ResUserDto();
+        resUserDto.setId(user.getId());
+        resUserDto.setEmail(user.getEmail());
+        resUserDto.setName(user.getName());
+        resUserDto.setAddress(user.getAddress());
+        resUserDto.setPhoneNumber(user.getPhone_number());
+        return resUserDto;
+    }
 }

@@ -27,13 +27,15 @@ import com.example.demo.util.error.InvalidException;
 public class MatchService {
     private final MatchRepository matchRepository;
     private final TeamService teamService;
+    private final UserService userService;
 
-    public MatchService(MatchRepository matchRepository, TeamService teamService){
+    public MatchService(MatchRepository matchRepository, TeamService teamService, UserService userService){
         this.matchRepository = matchRepository;
         this.teamService = teamService;
+        this.userService = userService;
     }
     public Match createNewMatch(Match match){
-        return  this.matchRepository.save(match);
+        return this.matchRepository.save(match);
     }
     public Match convertDtoToMatch(MatchRequestDto matchRequestDto){
         Match match = new Match();
@@ -54,8 +56,11 @@ public class MatchService {
         Pageable pageable = PageRequest.of(page, size);
         Page<Match> matches = this.matchRepository.findAll(pageable);
         List<Match> pageMatch = matches.getContent();
+        List<ResMatchDto> resAllMatches = pageMatch.stream()
+            .map(this::convertToResMatch)
+            .collect(Collectors.toList());
         ResAllMatches allMatches = new ResAllMatches();
-        allMatches.setMatches(pageMatch);
+        allMatches.setMatches(resAllMatches);
         allMatches.setNumberOfElement(matches.getNumberOfElements());
         allMatches.setTotalElement(matches.getTotalElements());
         allMatches.setTotalPage(matches.getTotalPages());

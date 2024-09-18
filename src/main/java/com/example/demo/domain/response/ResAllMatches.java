@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResAllMatches {
-    private List<Match> matches;
+    private List<ResMatchDto> matches;
     private int totalPage;
     private long totalElement;
     private int numberOfElement;

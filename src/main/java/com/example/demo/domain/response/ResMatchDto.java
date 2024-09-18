@@ -23,4 +23,5 @@ public class ResMatchDto {
     private boolean status;
     private ResInTeam team1;
     private ResInTeam team2;
+    private ResUserDto user;
 }
